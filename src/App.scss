@@ -1,0 +1,288 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+// line height 1.7
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: $pt-navbar-height;
+  min-height: 100vh;
+  margin: 0;
+  flex-direction: column;
+}
+
+.bp3-navbar {
+  padding: 0px 100px !important;
+}
+
+.bp3-menu {
+  max-height: 300px;
+  overflow: auto;
+  width: 250px;
+}
+
+.bp3-callout {
+  // padding: 20px 12px;
+  margin-bottom: 10px;
+}
+
+.bp3-running-text {
+  line-height: 1.7 !important;
+}
+
+.SubmissionInfo {
+  padding-top: 30px;
+}
+
+.Home, .Principle, .Example {
+  h1 {
+    margin-top: 0px;
+  }
+  padding-top: 30px;
+
+  .ImgWithCaption {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-bottom: 10px;
+    text-align: center;
+  }
+}
+
+.Tools {
+  .Code {
+    overflow: scroll;
+    font-family: Ubuntu Mono, monospace;
+    color: #f8f8f2;
+    background-color:#272822;
+    padding: 4px 8px;
+
+    .Shell {
+      font-weight: bold;
+      user-select: none;
+      color: #a6e22e;
+      .Bang {
+        font-weight: normal;
+        color: #f8f8f2;
+      }
+      .Dir {
+        color: #66d9ef;
+      }
+    }
+  }
+
+  ul {
+    li {
+      margin-bottom: 6px;
+    }
+  }
+}
+
+.Footer {
+  text-align: center;
+  width: 100%;
+  background-color: rgba(200, 200, 200, 0.1);
+  padding: 30px 0px;
+  color: black;
+  margin-top: auto;
+}
+
+.Example {
+}
+
+.SubmissionSubmit {
+  width: 100%;
+  margin-left: 0px !important;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  justify-content: center !important;
+
+  .LoadingPDB {
+    text-align: center;
+    p {
+      padding-top: 20px;
+    }
+  }
+
+  .SubComponent {
+    max-width: 800px !important;
+  }
+
+  .ResidueSelect {
+    .bp3-button {
+      width: 250px;
+
+      .bp3-icon {
+        margin-left: auto;
+      }
+    }
+  }
+}
+
+.Viewer {
+  .bp3-spinner {
+    z-index: 999;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.SearchSpace {
+  padding-top: 5px;
+  .Text {
+    width: 40%;
+  }
+  .Image, .ImagePlaceholder {
+    position: relative;
+    width: 350px;
+    height: 350px;
+    img {
+      float: right;
+      width: 350px;
+      height: 350px;
+      background-color: white;
+      border-radius: 5px;
+    }
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .bp3-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  .ImagePlaceholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+      font-style: italic;
+    }
+  }
+}
+
+.SubmissionSubmitForm {
+  padding: 30px;
+
+  #paramsWarning {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 15px;
+  }
+
+  .bp3-form-group {
+    width: 500px;
+  }
+}
+
+.SubmissionSubmitForm #submitButtonRow {
+  justify-content: flex-end !important;
+}
+
+.margin-0 {
+  margin: 0;
+}
+
+.align-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.align-left-right {
+  display: flex;
+  justify-content: space-between;
+}
+
+.SubmissionInfo #inputstatuscard {
+  width: 400px;
+}
+
+.SubmissionInfo #status {
+  float: right;
+}
+
+.SubmissionInfo #input .bp3-input-group {
+  float: left;
+  width: 300px;
+}
+
+.SubmissionInfo #button {
+  text-align: right;
+}
+
+.SequenceList {
+  list-style: none;
+  padding-left: 0px;
+  
+  li {
+    &:first-child {
+      border-top: 1px solid rgba(50, 50, 50, 0.2); 
+    }
+
+    border-bottom: 1px solid rgba(50, 50, 50, 0.2);
+  }
+}
+
+.loadingSpinnerWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  background-color: rgba(50, 50, 50, 0.5);
+  overflow: hidden;
+}
+
+.loadingSpinner{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 6;
+  transform: translate(-50%, -50%)
+}
+
+.graphTooltip {
+  background-color: $blue2 !important;
+  color: white;
+}
+
+.SubmissionFind {
+  .bp3-form-group.bp3-inline {
+    justify-content: center;
+  }
+  .bp3-form-content {
+    text-align: center;
+
+    .bp3-input-group {
+      display: inline-block;
+      width: 300px;
+    }
+  }
+}
+
+.SubmissionResult {
+  #downloadButton {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.Tutorial {
+  padding-top: 30px;
+}
