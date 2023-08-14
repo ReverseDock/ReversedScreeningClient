@@ -18,7 +18,6 @@ export default function SubmissionConfirm(props: {toaster: IToaster}) {
                     window.location.href = `/info?id=${submissionId}`
                 }
             ).catch((err) => {
-                console.log(err);
                 setError(err.toString());
                 props.toaster.show({message: `Error occured during confirmation: ${err}`, intent: "danger"});
             })

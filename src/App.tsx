@@ -37,7 +37,7 @@ function App() {
             <NavbarDivider/>
             <NavLink exact to="/" className={[Classes.BUTTON, Classes.MINIMAL].join(" ")} activeClassName={Classes.ACTIVE}>Home</NavLink>
             <NavLink exact to="/tutorial" className={[Classes.BUTTON, Classes.MINIMAL].join(" ")} activeClassName={Classes.ACTIVE}>Tutorial</NavLink>
-            <NavLink exact to="/info?id=d6c353be-327d-4aad-9b65-52516d5adaf5" className={[Classes.BUTTON, Classes.MINIMAL].join(" ") } >Example</NavLink>
+            <NavLink exact to="/info?id=02a02962-c7b5-4594-a54b-a26e8ea3884d" className={[Classes.BUTTON, Classes.MINIMAL].join(" ") } >Example</NavLink>
             <NavLink exact to="/impressum" className={[Classes.BUTTON, Classes.MINIMAL].join(" ") } activeClassName={Classes.ACTIVE}>Impressum</NavLink>
           </NavbarGroup>
           <NavbarGroup align="right">

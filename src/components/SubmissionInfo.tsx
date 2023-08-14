@@ -112,18 +112,13 @@ function SubmissionInfo(props: {setLoading: Function, toaster: IToaster}) {
                 <Row nogutter>
                     <Col md={8}>
                         <Card elevation={1} style={{height: "225px"}}>
-                            <H3>Submission Information</H3>
+                            <H3>Information</H3>
                             <HTMLTable bordered striped width={"100%"}>
                                 <tbody>
                                     <tr>
-                                        <td><b>Submitted File</b></td>
+                                        <td><b>Submitted Ligand</b></td>
                                         <td>{info?.ligandFileName}</td>
                                         <td><AnchorButton icon="download" minimal href={`${axios.defaults.baseURL}/submissions/${id}/ligand`}></AnchorButton></td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Submitted Receptor List</b></td>
-                                        <td>{info?.receptorListFilename}</td>
-                                        <td><AnchorButton icon="download" minimal href={`${axios.defaults.baseURL}/submissions/${id}/receptors`}></AnchorButton></td>
                                     </tr>
                                     <tr>
                                         <td><b>Time of Submission</b></td>
@@ -136,7 +131,7 @@ function SubmissionInfo(props: {setLoading: Function, toaster: IToaster}) {
                     </Col>
                     <Col md={4}>
                         <Card elevation={1} style={{height: "225px"}}>
-                            <H3>Submission Status</H3>
+                            <H3>Status</H3>
                             <SubmissionStatus status={status}></SubmissionStatus>
                             {  status > 4 &&
                                 <SubmissionProgress progress={progress}></SubmissionProgress>

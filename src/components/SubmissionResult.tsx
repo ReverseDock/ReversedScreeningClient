@@ -1,17 +1,16 @@
 import React, { RefCallback, useCallback, useEffect } from 'react'
 import axios from 'axios'
-import { Card, IToaster, H3, HTMLTable, AnchorButton, Icon, Spinner, InputGroup, FormGroup, Callout, Radio, RadioGroup } from '@blueprintjs/core'
+import { Card, IToaster, H3, HTMLTable, AnchorButton, Icon, Spinner, InputGroup, FormGroup, Callout, Button } from '@blueprintjs/core'
 import { Row, Col } from "react-grid-system"
 
 const ngl: any = require("ngl/dist/ngl")
 
 interface IDockingResult {
     guid: string,
-    uniProtId: string,
     receptorName: string,
     affinity: number,
-    receptorFASTA: string,
-    success: boolean
+    success: boolean,
+    status: number
 }
 
 interface IProps {
@@ -21,29 +20,29 @@ interface IProps {
     toaster: IToaster
 }
 
+enum ESorted {
+    "asc",
+    "desc",
+    "none"
+}
+
 export default function SubmissionResult(props: IProps) {
     const [fileLoading, setFileLoading] = React.useState<boolean>(false);
     const [results, setResults] = React.useState<IDockingResult[]>([]);
     const [filteredResults, setFilteredResults] = React.useState<IDockingResult[]>([]);
     const [filter, setFilter] = React.useState<string>("");
-    const [filterType, setFilterType] = React.useState<number>(0);
     const [stage, setStage] = React.useState();
     const [page, setPage] = React.useState<number>(0);
     const perPage = 10;
     const [maxPages, setMaxPages] = React.useState<number>(10);
     const [viewSelected, setViewSelected] = React.useState<string>("");
+    const [sorted, setSorted] = React.useState<ESorted>(ESorted.none);
 
     useEffect(() => {
-        console.log(props.resultsResponseData);
         var resultResponse: IDockingResult[] = props.resultsResponseData.dockingResults;
-        resultResponse.sort((a, b) => a.affinity - b.affinity);
         setResults(resultResponse);
         setFilteredResults(resultResponse);
         setMaxPages(Math.ceil(resultResponse.length / perPage))
-        var chartData: (string|number)[][] = [['FASTA', 'Affinity']];
-        resultResponse.forEach((value, idx) => {
-            chartData.push([value.uniProtId, value.affinity]);
-        });
     }, [props.resultsResponseData])
 
     const stageElementRef: RefCallback<HTMLElement> = useCallback((element) => {
@@ -53,31 +52,17 @@ export default function SubmissionResult(props: IProps) {
         }
       }, []);
     
-    async function updateViewer(guid: string, uniProtId: string, failed: boolean = false) {
-        const schemeId = ngl.ColormakerRegistry.addScheme(function (this: any, params: any) {
-            this.atomColor = function (atom: any) {
-              if (atom.bfactor > 90) {
-                return 0x0053D6; 
-              } else if (atom.bfactor > 70) {
-                return 0x65CBF3; 
-              } else if (atom.bfactor > 50) {
-                return 0xFFDB13; 
-              } else {
-                return 0xFF7D45;
-              }
-            };
-          });
-
+    async function updateViewer(guid: string, receptorName: string, failed: boolean = false) {
         // @ts-ignore: Object is possibly 'null'
         stage.removeAllComponents();
         setFileLoading(true);
         // @ts-ignore: Object is possibly 'null'
-        var receptor = await stage.loadFile(`${axios.defaults.baseURL}/receptors/${uniProtId}/pdbqt`, {ext: "pdbqt", name: uniProtId});
-        receptor.addRepresentation("cartoon", {color: schemeId});
+        var receptor = await stage.loadFile(`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${guid}/pdbqt`, {ext: "pdbqt", name: receptorName});
+        receptor.addRepresentation("cartoon");
         // receptor.addRepresentation("cartoon", {colorScheme: "bfactor", colorDomain: [50.00, 100.00], colorScale: ["red", "blue"]});
         if (!failed) {
             // @ts-ignore: Object is possibly 'null'
-            var ligand = await stage.loadFile(`${axios.defaults.baseURL}/submissions/${props.id}/results/${guid}`, {ext: "pdbqt", sele: "/0", name: "Ligand"});
+            var ligand = await stage.loadFile(`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${guid}/modes`, {ext: "pdbqt", sele: "/0", name: "Ligand"});
             ligand.addRepresentation("licorice");
         }
         // @ts-ignore: Object is possibly 'null'
@@ -85,27 +70,14 @@ export default function SubmissionResult(props: IProps) {
         // @ts-ignore: Object is possibly 'null'
         stage.setFocus(0);
         setFileLoading(false);
-        setViewSelected(uniProtId);
+        setViewSelected(receptorName);
     }
 
-    function onFilter(type: number) {
-        setFilterType(type);
-        updateFilteredResults(type);
-    }
-
-    function updateFilteredResults(type: number = filterType, newFilter: string = filter) {
-        if (type === 0) {
-            let filteredResultsNew = results.filter(val => val.uniProtId.toLocaleLowerCase().includes(newFilter.toLocaleLowerCase()))
-            setMaxPages(Math.ceil(filteredResultsNew.length / perPage))
-            setPage(0)
-            setFilteredResults(filteredResultsNew)
-        }
-        else {
+    function updateFilteredResults(newFilter: string = filter) {
             let filteredResultsNew = results.filter(val => val.receptorName.toLocaleLowerCase().includes(newFilter.toLocaleLowerCase()))
             setMaxPages(Math.ceil(filteredResultsNew.length / perPage))
             setPage(0)
             setFilteredResults(filteredResultsNew)
-        }
     }
 
     function testOnClick() {
@@ -120,29 +92,38 @@ export default function SubmissionResult(props: IProps) {
         } )
     }
 
+    function sortResults(direction: ESorted) {
+        setSorted(direction);
+        setPage(0);
+        switch(direction) {
+            case ESorted.asc:
+                setFilteredResults([...filteredResults].sort((a, b) => a.affinity - b.affinity));
+                break;
+            case ESorted.desc:
+                setFilteredResults([...filteredResults].sort((a, b) => b.affinity - a.affinity));
+                break;
+            case ESorted.none:
+                // Return to original results
+                setFilteredResults(results);
+                // Reapply filter
+                updateFilteredResults(filter)
+                break;
+        }
+    }
+
     return(
         <div>
             <Row nogutter style={{ marginBottom: "30px"}}>
                 <Col md={5}>
-                    <Card className="Viewer" elevation={1} style={{height: "740px", position: "relative"}}>
+                    <Card className="Viewer" elevation={1} style={{height: "625px", position: "relative"}}>
                         <H3> NGL Viewer </H3>
                         <Callout>View a result by clicking on the <Icon iconSize={16} icon="eye-open"/> icon next to a result.</Callout>
-                        <Callout intent='primary'>AlphaFold prediction confidence levels of the structures of the submitted proteins are coloured as shown in the legend. 
-                        Ligand docking poses at low confidence regions of the AlphaFold protein models should be interpreted with caution. Check the <a target='_blank' rel="noopener noreferrer" href="https://alphafold.ebi.ac.uk/faq#faq-5">AlphaFold FAQ</a> for more information.</Callout>
                         {fileLoading
                         ?
                             <Spinner intent="primary" ></Spinner>
                         :
                             null
                         }
-                        <div style={{position: "absolute",  bottom: "25px", right: "22px", zIndex: 30, padding: "4px", background: "white"}}>
-                            <ul style={{listStyle:"none", paddingLeft: "0px", margin: '0px', fontSize: "12px"}}>
-                                <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#0053D6", verticalAlign: "middle"}}></div> Very high (plDDT &gt; 90)</li>
-                                <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#65CBF3", verticalAlign: "middle"}}></div> Confident (90 &ge; plDDT &gt; 70)</li>
-                                <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#FFDB13", verticalAlign: "middle"}}></div> Low (70 &ge; plDDT &gt; 50)</li>
-                                <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#FF7D45", verticalAlign: "middle"}}></div> Very low (50 &ge; plDDT)</li>
-                            </ul>
-                        </div>
                         {
                             viewSelected !== "" &&
                                 <AnchorButton style={{position: "absolute",  bottom: "25px", left: "22px", zIndex: 30, background: "white"}} icon="camera" onClick={() => testOnClick()} outlined minimal> Screenshot</AnchorButton>
@@ -159,43 +140,52 @@ export default function SubmissionResult(props: IProps) {
                                 <Callout>Download the pdbqt files by clicking on the <Icon iconSize={16} icon="download"/> icons. Switch pages by clicking
                                     on <Icon iconSize={16} icon="chevron-left"/> and <Icon iconSize={16} icon="chevron-right"/> icons below the table.</Callout>
                             </Col>
-                            { results.filter(x => !x.success).length > 0 &&
+                            { results.filter(x => !x.success && x.affinity === -1).length > 0 &&
                                 <Col md={6}>
-                                    <Callout intent='primary'><b>{results.filter(x => !x.success).length}</b> of <b>{results.length}</b> dockings failed.
+                                    <Callout intent='primary'><b>{results.filter(x => !x.success && x.affinity === -1).length}</b> of <b>{results.length}</b> dockings failed.
                                     This might be due to a large search space. Check the last page of the table to find out which targets could not be docked.</Callout>
                                 </Col>
                             }
                         </Row>
                         <div>
                             <FormGroup inline style={{display: "inline-block", marginRight: "20px"}}>
-                                <InputGroup leftIcon="filter" value={filter} onChange={(event) => { setFilter(event.target.value); updateFilteredResults(filterType, event.target.value) }}></InputGroup>
+                                <InputGroup leftIcon="filter" value={filter} onChange={(event) => { setFilter(event.target.value); updateFilteredResults(event.target.value) }}></InputGroup>
                             </FormGroup>
-                            <RadioGroup className='inline-block' onChange={(event) => onFilter(Number(event.currentTarget.value))} selectedValue={filterType} inline>
-                                <Radio label="UniProtId" value={0}></Radio>
-                                <Radio label="Name" value={1}></Radio>
-                            </RadioGroup>
                         </div>
                         <HTMLTable bordered striped width={"100%"}>
                             <thead>
                                 <tr>
-                                    <th>UniProtId</th>
-                                    <th>Protein name and organism</th>
-                                    <th>Predicted <br/>binding energy [kcal/mol] </th>
+                                    <th>File name</th>
+                                    <th style={{
+                                        backgroundColor: sorted !== ESorted.none ? "#EEEEEE" : ""
+                                    }}>Predicted <br/>binding energy [kcal/mol] 
+                                    {
+                                        sorted === ESorted.desc
+                                        ?
+                                            <Button minimal icon="chevron-up" onClick={() => sortResults(ESorted.asc)}></Button>
+                                        :
+                                            sorted === ESorted.asc
+                                            ?
+                                                <Button minimal icon="cross" onClick={() => sortResults(ESorted.none)}></Button>
+                                            :
+                                                <Button minimal icon="chevron-down" onClick={() => sortResults(ESorted.desc)}></Button>
+                                    }
+                                    </th>
                                     <th>View</th>
                                     <th>Predicted <br/>binding modes (pdbqt)</th>
-                                    <th>AlphaFold <br/>prediction (pdbqt)</th>
+                                    <th>Receptor (pdbqt)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredResults.slice(page * perPage, page * perPage + perPage).map((value, idx) => {
                                     return(
                                         <tr key={idx}>
-                                            <td>{value.uniProtId}</td>
                                             <td>{value.receptorName ?? ""}</td>
-                                            <td>{value.success ? value.affinity : "Docking failed"}</td>
-                                            <td><AnchorButton icon="eye-open" minimal onClick={() => updateViewer(value.guid, value.uniProtId, !value.success)}></AnchorButton></td>
-                                            <td><AnchorButton icon="download" minimal disabled={!value.success} href={`${axios.defaults.baseURL}/submissions/${props.id}/results/${value.guid}`}></AnchorButton></td>
-                                            <td><AnchorButton icon="download" minimal href={`${axios.defaults.baseURL}/receptors/${value.uniProtId}/pdbqt`}></AnchorButton></td>
+                                            <td>{value.status === 3 ? (value.success ? value.affinity : (value.affinity !== -1 ? "Docking pending" : "Docking failed"))
+                                                : (value.status === 0 ? "Too many amino acids in receptor" : "Error during docking preparation")}</td>
+                                            <td><AnchorButton icon="eye-open" minimal disabled={value.status !== 3} onClick={() => updateViewer(value.guid, value.receptorName, !value.success)}></AnchorButton></td>
+                                            <td><AnchorButton icon="download" minimal disabled={!value.success || value.status !== 3} href={`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${value.guid}/modes`}></AnchorButton></td>
+                                            <td><AnchorButton icon="download" minimal disabled={value.status !== 3} href={`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${value.guid}/pdbqt`}></AnchorButton></td>
                                         </tr>
                                     )
                                 })}

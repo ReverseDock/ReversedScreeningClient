@@ -1,5 +1,5 @@
 import './App.scss';
-import unifreiburg from './assets/unifreiburg.png';
+import unifreiburg from './assets/unifreiburg_transparent.png';
 import cibss from './assets/cibss.svg';
 import { Col, Row } from "react-grid-system";
 
@@ -14,7 +14,7 @@ function Footer() {
                     <Col md={6}>
                         <a rel="noopener noreferrer" target="_blank" href="https://uni-freiburg.de/">
                             <img src={unifreiburg} alt="Uni Freiburg" style={{
-                            maxWidth: "40%"
+                            maxWidth: "60%"
                             }}/>
                         </a>
                     </Col>
