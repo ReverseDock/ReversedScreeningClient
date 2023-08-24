@@ -1,5 +1,6 @@
 import { Container, Row, Col } from "react-grid-system"
 import submit from "./assets/submit.png"
+import submit2 from "./assets/submit2.png"
 import proteins from "./assets/proteins.png"
 import status from "./assets/status.png"
 import ngl from "./assets/ngl.png"
@@ -40,7 +41,7 @@ export default function Tutorial() {
             <Card style={{marginTop: "20px"}}>
                 <Row>
                     <Col md={6}>
-                        <img alt="" src={submit} style={{width: "100%", height: "auto"}}></img>
+                        <img alt="" src={submit2} style={{width: "100%", height: "auto"}}></img>
                     </Col>
                     <Col md={6} style={{marginTop: "20px"}}>
                         <H4>Step 3: Submit</H4>

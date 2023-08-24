@@ -204,6 +204,48 @@ export default function SubmissionResult(props: IProps) {
                     </Card>
                 </Col>
             </Row>
+            <Row>
+                <Col md={6}>
+                    <Callout intent='warning' title='Caveats and Potential Pitfalls of Using ReverseDock'>
+                        <b>Scoring Function Limitations: </b>Autodock Vina employs a scoring function to estimate binding energies. However, these estimates might not always align perfectly with experimental binding affinities. Users should approach numerical values with caution, as they might not accurately reflect absolute binding strength.
+                        <br/>
+                        <br/>
+                        <b>Sampling Limitations: </b>The success of docking simulations relies heavily on the accuracy of generated conformations and the extent of conformational space sampling. Bigger ligand / protein targets may require more extensive sampling.
+                        <br/>
+                        <br/>
+                        <b>Inaccurate Structures: </b>The reliability of docking results hinges on the precision of input protein and ligand structures. Structural errors, inaccuracies, or missing residues can impact the credibility of outcomes.
+                        <br/>
+                        <br/>
+                        <b>Ligand Flexibility: </b>Autodock Vina can accommodate some degree of ligand flexibility. However, caution is advised when dealing with highly flexible ligands.
+                    </Callout>
+                </Col>
+                <Col md={6}>
+                    <Callout intent="primary" title="Directions to Assess Quality or Reliability of ReverseDock Outputs">
+                        <b>Visual Inspection: </b>Employ molecular visualization software to scrutinize binding poses. Does the predicted binding mode align logically with protein-ligand interactions and steric considerations?
+                        <br/>
+                        <br/>
+                        <b>Binding Site Consistency: </b>Compare predicted binding sites with known sites from experimental structures or literature. Do predicted sites correspond with established references?
+                        <br/>
+                        <br/>
+                        <b>Redocking Experiments: </b>If feasible, execute redocking experiments using protein-ligand complexes with known structures.
+                        <br/>
+                        <br/>
+                        <b>Consensus Scoring: </b>Consider utilizing alternative docking tools to validate results. When various tools concur on a specific binding mode, it bolsters confidence in the prediction.
+                        <br/>
+                        <br/>
+                        <b>Binding Energies: </b>While binding energies might not be directly comparable to experimental values, comparing relative energies within a ligand set can offer insights into relative affinities.
+                        <br/>
+                        <br/>
+                        <b>Validation with Literature: </b>Contrast your findings with existing literature on analogous protein-ligand systems. If your results align with established interactions, it enhances result credibility.
+                        <br/>
+                        <br/>
+                        <b>Sensitivity Analysis: </b>Modify input parameters by using various amino acid mutations on your target to observe their impact on docking results. This aids in identifying consistent trends.
+                        <br/>
+                        <br/>
+                        <b>Experimental Confirmation: </b>Whenever possible, validate predictions through experimental assays like binding assays or structure determination methods like X-ray crystallography or NMR spectroscopy.
+                    </Callout>
+                </Col>
+            </Row>
         </div>
     )
 }

@@ -71,8 +71,8 @@ function UploadLigands(props : {setLoading: Function, toaster: IToaster, setStep
     return (
         <div>
             <Callout intent="primary" icon="info-sign" title="Uploading the ligand">
-                <p>Please choose your ligand in .mol2 format.</p>
-                <p>If your ligand is a different file format than .mol2 you can use <a rel="noopener noreferrer" target="_blank" href="https://www.cheminfo.org/Chemistry/Cheminformatics/FormatConverter/index.html">Open Babel</a> to convert it to .mol2.</p>
+                <p>Please choose your ligand in .mol2 format. If your ligand is a different file format than .mol2 you can use <a rel="noopener noreferrer" target="_blank" href="https://www.cheminfo.org/Chemistry/Cheminformatics/FormatConverter/index.html">Open Babel</a> to convert it to .mol2.</p>
+                <p>Your ligand will be protonated at pH 7 using <a rel="noopener noreferrer" target="_blank" href="https://www.cheminfo.org/Chemistry/Cheminformatics/FormatConverter/index.html">Open Babel</a>.</p>
                 <p>You can download an example ligand (Vitamin D) <Link to="/vitaminD.mol2" target="_blank" download>here</Link>.</p>
             </Callout>
             <FormGroup label="Select ligand file in .mol2 format.">
