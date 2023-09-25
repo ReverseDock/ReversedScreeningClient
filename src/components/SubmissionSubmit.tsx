@@ -1,19 +1,24 @@
 import React from 'react';
 import axios from 'axios';
-import { FileInput, AnchorButton, FormGroup, IToaster, Card, Callout, ProgressBar, Spinner, InputGroup } from '@blueprintjs/core';
+import { FileInput, AnchorButton, FormGroup, IToaster, Card, Callout, ProgressBar, Spinner, InputGroup, TextArea, Divider, Icon } from '@blueprintjs/core';
 import { Link, useHistory } from "react-router-dom";
 import { Row, Col } from 'react-grid-system';
 
-function UploadLigands(props : {setLoading: Function, toaster: IToaster, setStep: Function, setId: Function,
-                                  selectedFiles?: FileList, setSelectedFiles: Function}) {
+interface ReceptorFeedback {
+    status: string,
+    uniProtId: string
+}
+
+function UploadLigands(props : {setLoading: Function, toaster: IToaster, setStep: Function, setId: Function}) {
     const [fileFormName, setFileFormName] = React.useState<string>("Select file")
     const [formData, setFormData] = React.useState<FormData>(new FormData());
+    const [selectedFiles, setSelectedFiles] = React.useState<FileList | null>(null);
     // const noReceptors = props.selectedFiles != null ? props.selectedFiles.length : 0;
 
     function onFileChange(event : React.ChangeEvent<HTMLInputElement>) {
         setFormData(new FormData());
         if (event.target.files != null) {
-            props.setSelectedFiles(event.target.files);
+            setSelectedFiles(event.target.files);
             let names = ""
             for (var i = 0; i < event.target.files.length; i++) {
                 names += event.target.files[i].name + ", "
@@ -55,10 +60,10 @@ function UploadLigands(props : {setLoading: Function, toaster: IToaster, setStep
     }
 
     function onNextClick() {
-        if (props.selectedFiles != null) {
-            for (var i = 0; i < props.selectedFiles.length; i++) {
-                formData.append("ligandFile", props.selectedFiles[i], props.selectedFiles[i].name)
-                let ext = props.selectedFiles[i].name.split(".").pop();
+        if (selectedFiles != null) {
+            for (var i = 0; i < selectedFiles.length; i++) {
+                formData.append("ligandFile", selectedFiles[i], selectedFiles[i].name)
+                let ext = selectedFiles[i].name.split(".").pop();
                 if (ext !== "mol2") {
                     props.toaster.show({message: "Wrong file extension. Please provide a .mol2 file.", intent: "danger", icon: "cross"})
                     return;
@@ -70,33 +75,59 @@ function UploadLigands(props : {setLoading: Function, toaster: IToaster, setStep
 
     return (
         <div>
-            <Callout intent="primary" icon="info-sign" title="Uploading the ligand">
+            <Callout intent="primary" icon="info-sign" title="Upload the ligand">
                 <p>Please choose your ligand in .mol2 format. If your ligand is a different file format than .mol2 you can use <a rel="noopener noreferrer" target="_blank" href="https://www.cheminfo.org/Chemistry/Cheminformatics/FormatConverter/index.html">Open Babel</a> to convert it to .mol2.</p>
                 <p>Your ligand will be protonated at pH 7 using <a rel="noopener noreferrer" target="_blank" href="https://www.cheminfo.org/Chemistry/Cheminformatics/FormatConverter/index.html">Open Babel</a>.</p>
                 <p>You can download an example ligand (Vitamin D) <Link to="/vitaminD.mol2" target="_blank" download>here</Link>.</p>
             </Callout>
             <FormGroup label="Select ligand file in .mol2 format.">
-                <FileInput text={fileFormName} hasSelection={!(props.selectedFiles == null)}
+                <FileInput text={fileFormName} hasSelection={!(selectedFiles == null)}
                         onInputChange={onFileChange} inputProps={{multiple: false}}
                         id="file-upload" fill/>
             </FormGroup>
             
             <div className="align-right">
-                <AnchorButton onClick={onNextClick} intent="primary" disabled={!(props.selectedFiles != null)}>Next</AnchorButton>
+                <AnchorButton onClick={onNextClick} intent="primary" disabled={!(selectedFiles != null)}>Next</AnchorButton>
             </div>
         </div>
     )
 }
 
-function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setStep: Function, id: string,
-                         selectedFiles?: FileList, setSelectedFiles: Function}) {
+function SelectReceptorType(props : {setStep: Function}) {
+    return (
+    <div>
+        <Callout intent='primary' icon="info-sign" title="Select receptor type">
+            <p>Choose between PDB files and AlphaFold predictions.</p>
+            <Row>
+                <Col md={6}>
+                    <b>PDB files</b>
+                    <p>Upload up to a 100 <b>PDB files</b> with a maximum length of 1000 AAs.</p>
+
+                </Col>
+                <Col md={6}>
+                    <b>AlphaFold</b>
+                    <p>Provide up to a 100 <b>UniProt</b> Ids of protein structures predicted by AlphaFold. Length is limited to 1000 AAs.</p>
+
+                </Col>
+            </Row>
+        </Callout>
+        <div style={{justifyContent: "flex-end", display: "flex"}}>
+            <AnchorButton onClick={() => props.setStep(2)} intent='primary'>PDB Files</AnchorButton>
+            <AnchorButton onClick={() => props.setStep(3)} intent='primary' style={{marginLeft: "10px"}}>AlphaFold</AnchorButton>
+        </div>
+    </div>
+    )
+}
+
+function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setStep: Function, id: string}) {
     const [fileFormName, setFileFormName] = React.useState<string>("Select file(s)")
     const [formData, setFormData] = React.useState<FormData>(new FormData());
+    const [selectedFiles, setSelectedFiles] = React.useState<FileList | null>(null);
 
     function onFileChange(event : React.ChangeEvent<HTMLInputElement>) {
         setFormData(new FormData());
         if (event.target.files != null) {
-            props.setSelectedFiles(event.target.files);
+            setSelectedFiles(event.target.files);
             let names = ""
             for (var i = 0; i < event.target.files.length; i++) {
                 names += event.target.files[i].name + ", "
@@ -111,7 +142,7 @@ function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setSt
             (response) => {
                 if (response.status === 200) {
                     props.toaster.show({message: "File(s) uploaded successfully", intent: "success", icon:"tree"});
-                    props.setStep(2)
+                    props.setStep(4)
                     props.setLoading(false);
                 }
 
@@ -134,9 +165,9 @@ function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setSt
     }
 
     function onUploadClick() {
-        if (props.selectedFiles != null) {
-            for (var i = 0; i < props.selectedFiles.length; i++) {
-                formData.append("receptorsFiles", props.selectedFiles[i], props.selectedFiles[i].name)
+        if (selectedFiles != null) {
+            for (var i = 0; i < selectedFiles.length; i++) {
+                formData.append("receptorsFiles", selectedFiles[i], selectedFiles[i].name)
             }
             sendToApi();
         }
@@ -144,7 +175,7 @@ function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setSt
 
     return (
         <div>
-            <Callout intent="primary" icon="info-sign" title="Choosing your targets">
+            <Callout intent="primary" icon="info-sign" title="Choose your targets">
                 <p>Please upload your target proteins in PDB format below. Submissions are limited to less than 100 proteins that are less than 1000 amino acids.</p>
                 <p style={{marginBottom: "0px"}}>Note that in the next steps:</p>
                 <ul style={{marginTop: "0px"}}>
@@ -162,21 +193,164 @@ function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setSt
             </Callout>
             <FormGroup label="Select PDB files.">
                 <Row nogutter>
-                    <Col md={11}>
-                        <FileInput text={fileFormName} hasSelection={!(props.selectedFiles == null)}
+                    <Col md={12}>
+                        <FileInput text={fileFormName} hasSelection={!(selectedFiles == null)}
                             onInputChange={onFileChange} inputProps={{multiple: true}}
                             id="file-upload" fill/>
                     </Col>
-                    <Col md={1} style={{paddingLeft: "5px"}}>
-                        <AnchorButton onClick={onUploadClick} intent="primary" disabled={!(props.selectedFiles != null)}>Upload</AnchorButton>
-                    </Col>
                 </Row>
             </FormGroup>
+            <div style={{display: "flex", justifyContent: "space-between"}}>
+                <AnchorButton onClick={() => props.setStep(1)} intent='primary'>Back</AnchorButton>
+                <AnchorButton onClick={onUploadClick} intent="primary" disabled={!(selectedFiles != null)}>Upload</AnchorButton>
+            </div>
         </div>
     )
 }
 
-function ParamsSubmit(props: {toaster: IToaster, selectedFiles?: FileList, uuid: string}) {
+function UploadUniProtIds(props : {setLoading: Function, toaster: IToaster, setStep: Function, id: string}) {
+    const [listUploaded, setListUploaded] = React.useState<boolean>(false);
+    const [atLeastOneReceptorOkay, setAtLeastOneReceptorOkay] = React.useState<boolean>(false);
+    const [receptorFeedback, setReceptorFeedback] = React.useState<ReceptorFeedback[]>([]);
+    const [feedbackLoading, setFeedbackLoading] = React.useState<boolean>(false);
+    const [textField, setTextField] = React.useState<string>("");
+
+    function sendToApi(uniProtIds: string[]) {
+        setFeedbackLoading(true);
+        setReceptorFeedback([]);
+        axios.post("/submissions/" + props.id + "/receptors/uniprot",
+            uniProtIds
+        ).then(
+            (response) => {
+                if (response.status === 200) {
+                    if (response.data) {
+                        props.toaster.show({message: "UniProt ids selected successfully", intent: "success", icon:"tree"});
+                        console.log(response.data);
+                        setReceptorFeedback(response.data);
+                        setAtLeastOneReceptorOkay(response.data.some((val: ReceptorFeedback) => val.status === "Okay"))
+                        setListUploaded(true);
+                        setFeedbackLoading(false);
+                    } else {
+                        props.toaster.show({message: "Error when trying to upload UniProt ids.", intent: "danger"})
+                    }
+                }
+            }
+        ).catch(
+            (error) => {
+                setFeedbackLoading(false);
+                if (error.response) {
+                    if (error.response.status === 400) {
+                        console.log(error.response)
+                        props.toaster.show({message: "Upload failed.", intent: "danger", icon: "cross"});
+                    } else {
+                        props.toaster.show({message: "" + error + ". Please contact the administrator: findr@biologie.uni-freiburg.de.", intent: "danger", icon: "cross"})
+                    }
+                } else {
+                    props.toaster.show({message: "" + error + ". Please contact the administrator: findr@biologie.uni-freiburg.de.", intent: "danger", icon: "cross"});
+                }
+            }
+        )
+    }
+
+    function onUploadClick() {
+        setListUploaded(false);
+        if (textField !== "") {
+            // Validate text field
+            if (textField.match(/[^a-zA-Z0-9_\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]/) != null) {
+                props.toaster.show({message: "Wrong format for UniProt input.", intent: "warning", icon:"warning-sign"})
+                return;
+            }
+            console.log(textField)
+            // TODO: Fix newline
+            // Extract uniProtIds
+            let uniProtIds = textField.split(/\s/).filter(x => x.length > 0);
+            sendToApi(uniProtIds);
+        }
+    }
+
+    function onNextClick() {
+        props.setStep(4)
+    }
+
+    function mapReceptorStatusToString(receptorStatus : string) : string {
+        if (receptorStatus === "Not found") return ": File not found. Either not part of available proteomes or prediction was not available at time of publication."
+        if (receptorStatus === "Too long") return ": Too many amino acids. Limit is 1000."
+        if (receptorStatus === "Okay") return ""
+        return "";
+    }
+
+    return (
+        <div>
+            <Callout intent="primary" icon="info-sign" title="Choose your targets">
+                <p>Please enter your UniProt ids in the text field as shown below, <b>one id per line</b>. Submissions are limited to less than 100 sequences for proteins that are less than 1000 amino acids.</p>
+                <p style={{marginBottom: "0px"}}>At the moment, proteins from the following organisms are supported:</p>
+                <ul style={{marginTop: "0px"}}>
+                    <li>Human (<i>Homo sapiens</i>)</li>
+                    <li>E.coli (<i>Escherichia coli</i> strain K12)</li>
+                    <li>Mouse (<i>Mus musculus</i>)</li>
+                    <li>Fruit fly (<i>Drosophila melanogaster</i>)</li>
+                    <li>Nematode worm (<i>Caenorhabditis elegans</i>)</li>
+                    <li>Thale cress (<i>Arabidopsis thaliana</i>)</li>
+                    <li>Baker's yeast (<i>Saccharomyces cerevisiae</i>)</li>
+                    <li>Norway rat (<i>Rattus norvegicus</i>)</li>
+                </ul>
+            </Callout>
+            <FormGroup label="Enter UniProt ids, one per line.">
+                <Row nogutter>
+                    <Col md={11} style={{display: "flex"}}>
+                        <TextArea placeholder={"P47887\nQ9UHD0\n..."}
+                            value={textField}
+                            style={{minHeight: "150px", maxHeight: "200px", minWidth: "200px", maxWidth: "200px"}}
+                            onChange={(ev) => setTextField(ev.target.value)}
+                            large
+                        />
+                        <AnchorButton onClick={onUploadClick} intent="primary" disabled={textField === ""}
+                            style={{marginLeft: "20px", alignSelf: "flex-end"}}>Check</AnchorButton>
+                    </Col>
+                    <Col md={1} style={{paddingLeft: "5px"}}>
+                    </Col>
+                </Row>
+            </FormGroup>
+            {
+                feedbackLoading &&
+                <Spinner></Spinner>
+            }
+            {receptorFeedback.length !== 0
+            ?
+                <div>
+                    <Divider style={{marginBottom: "15px"}}></Divider>
+                    <Callout title="Feedback" intent='primary'>
+                        <p>Out of <b>{receptorFeedback.length}</b> provided receptors, <b>{receptorFeedback.filter(x => x.status === "Okay").length}</b> can be docked.</p>
+                        <p>Below you will find a detailed summary of your provided input. Green receptors will be docked, red ones skipped. This is either because
+                        they are not available or are too large. The list is <b>scrollable</b>.</p>
+                    </Callout>
+                    <div style={{maxHeight: "400px", overflow: "scroll"}}>
+                        <ul>
+                            {receptorFeedback.map((value, idx) => (
+                                
+                                <li key={idx} style={{listStyleType: "none"}}>
+                                    {value.status === "Okay" ? <Icon icon="tick" intent='success'/> : <Icon icon="cross" intent='danger'/>}
+                                    <span style={{marginRight: "5px"}}></span>
+                                    <span style={{color: value.status === "Okay" ? "green" : "red"}}>
+                                    {value.uniProtId}<b>{mapReceptorStatusToString(value.status)}</b>
+                                    </span>
+                                </li>
+                            ))
+                            }
+                        </ul>
+                    </div>
+                </div>
+            : null
+            }
+            <div style={{display: "flex", justifyContent: "space-between"}}>
+                <AnchorButton onClick={() => props.setStep(1)} intent='primary'>Back</AnchorButton>
+                <AnchorButton onClick={onNextClick} intent="primary" disabled={!(listUploaded) || !(atLeastOneReceptorOkay)}>Next</AnchorButton>
+            </div>
+        </div>
+    )
+}
+
+function ParamsSubmit(props: {toaster: IToaster, uuid: string}) {
     const history = useHistory();
     const [email, setEmail] = React.useState<string>("");
     
@@ -227,19 +401,20 @@ export default function SubmissionSubmit(props : {setLoading: Function, toaster:
     const [loading, setLoading] = React.useState<boolean>(false);
     const [step, setStep] = React.useState<number>(0);
     const [id, setId] = React.useState<string>("");
-    const [fileList, setFileList] = React.useState<FileList>();
 
     function getSubComponent() {
         switch (step) {
             case 0:
-                return <UploadLigands setLoading={setLoading} toaster={props.toaster} setStep={setStep} setId={setId}
-                        selectedFiles={fileList} setSelectedFiles={setFileList}/>
+                return <UploadLigands setLoading={setLoading} toaster={props.toaster} setStep={setStep} setId={setId} />
             case 1:
-                return <UploadReceptors setLoading={setLoading} toaster={props.toaster} setStep={setStep} id={id}
-                        selectedFiles={fileList} setSelectedFiles={setFileList}/>
+                return <SelectReceptorType setStep={setStep}/>
             case 2:
-                return <ParamsSubmit selectedFiles={fileList} toaster={props.toaster}
-                        uuid={id}/>
+                return <UploadReceptors setLoading={setLoading} toaster={props.toaster} setStep={setStep} id={id} />
+            case 3:
+                return <UploadUniProtIds setLoading={setLoading} toaster={props.toaster} setStep={setStep} id={id} />
+            case 4:
+                return <ParamsSubmit toaster={props.toaster}
+                        uuid={id} />
             default:
                 return <div></div>;
         }
@@ -247,7 +422,12 @@ export default function SubmissionSubmit(props : {setLoading: Function, toaster:
     return(
         <div>
             <ProgressBar stripes={false} intent="primary"
-                         value={step < 3 ? step/4 : 0.75}/>
+                         value={step === 0 ? 0 :
+                                step === 1 ? 0.25 : 
+                                step === 2 ? 0.5 : 
+                                step === 3 ? 0.5 : 
+                                step === 4 ? 0.75 :
+                                            1.00}/>
             <Row className="SubmissionSubmit">
                 <Col xs={12}>
                     <p>

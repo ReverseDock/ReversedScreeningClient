@@ -10,7 +10,8 @@ interface IDockingResult {
     receptorName: string,
     affinity: number,
     success: boolean,
-    status: number
+    status: number,
+    alphaFold: boolean
 }
 
 interface IProps {
@@ -36,12 +37,12 @@ export default function SubmissionResult(props: IProps) {
     const perPage = 10;
     const [maxPages, setMaxPages] = React.useState<number>(10);
     const [viewSelected, setViewSelected] = React.useState<string>("");
-    const [sorted, setSorted] = React.useState<ESorted>(ESorted.none);
+    const [sorted, setSorted] = React.useState<ESorted>(ESorted.asc);
 
     useEffect(() => {
         var resultResponse: IDockingResult[] = props.resultsResponseData.dockingResults;
         setResults(resultResponse);
-        setFilteredResults(resultResponse);
+        setFilteredResults([...resultResponse].sort((a, b) => a.affinity - b.affinity));
         setMaxPages(Math.ceil(resultResponse.length / perPage))
     }, [props.resultsResponseData])
 
@@ -52,13 +53,34 @@ export default function SubmissionResult(props: IProps) {
         }
       }, []);
     
-    async function updateViewer(guid: string, receptorName: string, failed: boolean = false) {
+    async function updateViewer(guid: string, receptorName: string, failed: boolean = false, alphaFold: boolean = false) {
+        const schemeId = ngl.ColormakerRegistry.addScheme(function (this: any, params: any) {
+            this.atomColor = function (atom: any) {
+                if (atom.bfactor > 90) {
+                return 0x0053D6; 
+                } else if (atom.bfactor > 70) {
+                return 0x65CBF3; 
+                } else if (atom.bfactor > 50) {
+                return 0xFFDB13; 
+                } else {
+                return 0xFF7D45;
+                }
+            };
+            });
+        
         // @ts-ignore: Object is possibly 'null'
         stage.removeAllComponents();
         setFileLoading(true);
-        // @ts-ignore: Object is possibly 'null'
-        var receptor = await stage.loadFile(`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${guid}/pdbqt`, {ext: "pdbqt", name: receptorName});
-        receptor.addRepresentation("cartoon");
+        let receptor = null;
+        if (alphaFold) {
+            // @ts-ignore: Object is possibly 'null'
+            receptor = await stage.loadFile(`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${guid}/pdb`, {ext: "pdb", name: receptorName});
+            receptor.addRepresentation("cartoon", {color: schemeId});
+        } else {
+            // @ts-ignore: Object is possibly 'null'
+            receptor = await stage.loadFile(`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${guid}/pdbqt`, {ext: "pdbqt", name: receptorName});
+            receptor.addRepresentation("cartoon");
+        }
         // receptor.addRepresentation("cartoon", {colorScheme: "bfactor", colorDomain: [50.00, 100.00], colorScale: ["red", "blue"]});
         if (!failed) {
             // @ts-ignore: Object is possibly 'null'
@@ -115,14 +137,25 @@ export default function SubmissionResult(props: IProps) {
         <div>
             <Row nogutter style={{ marginBottom: "30px"}}>
                 <Col md={5}>
-                    <Card className="Viewer" elevation={1} style={{height: "625px", position: "relative"}}>
+                    <Card className="Viewer" elevation={1} style={{height: "auto", position: "relative"}}>
                         <H3> NGL Viewer </H3>
                         <Callout>View a result by clicking on the <Icon iconSize={16} icon="eye-open"/> icon next to a result.</Callout>
-                        {fileLoading
-                        ?
+                        {results.some(val => val.alphaFold) &&
+                            <Callout intent='primary'>AlphaFold prediction confidence levels of the structures of the submitted proteins are coloured as shown in the legend. 
+                            Ligand docking poses at low confidence regions of the AlphaFold protein models should be interpreted with caution. Check the <a target='_blank' rel="noopener noreferrer" href="https://alphafold.ebi.ac.uk/faq#faq-5">AlphaFold FAQ</a> for more information.</Callout>
+                        }
+                        {fileLoading &&
                             <Spinner intent="primary" ></Spinner>
-                        :
-                            null
+                        }
+                        {results.some(val => val.alphaFold) &&
+                            <div style={{position: "absolute",  bottom: "25px", right: "22px", zIndex: 30, padding: "4px", background: "white"}}>
+                                <ul style={{listStyle:"none", paddingLeft: "0px", margin: '0px', fontSize: "12px"}}>
+                                    <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#0053D6", verticalAlign: "middle"}}></div> Very high (plDDT &gt; 90)</li>
+                                    <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#65CBF3", verticalAlign: "middle"}}></div> Confident (90 &ge; plDDT &gt; 70)</li>
+                                    <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#FFDB13", verticalAlign: "middle"}}></div> Low (70 &ge; plDDT &gt; 50)</li>
+                                    <li><div style={{display: 'inline-block', width: "15px", height: "15px", background: "#FF7D45", verticalAlign: "middle"}}></div> Very low (50 &ge; plDDT)</li>
+                                </ul>
+                            </div>
                         }
                         {
                             viewSelected !== "" &&
@@ -183,7 +216,7 @@ export default function SubmissionResult(props: IProps) {
                                             <td>{value.receptorName ?? ""}</td>
                                             <td>{value.status === 3 ? (value.success ? value.affinity : (value.affinity !== -1 ? "Docking pending" : "Docking failed"))
                                                 : (value.status === 0 ? "Too many amino acids in receptor" : "Error during docking preparation")}</td>
-                                            <td><AnchorButton icon="eye-open" minimal disabled={value.status !== 3} onClick={() => updateViewer(value.guid, value.receptorName, !value.success)}></AnchorButton></td>
+                                            <td><AnchorButton icon="eye-open" minimal disabled={value.status !== 3} onClick={() => updateViewer(value.guid, value.receptorName, !value.success, value.alphaFold)}></AnchorButton></td>
                                             <td><AnchorButton icon="download" minimal disabled={!value.success || value.status !== 3} href={`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${value.guid}/modes`}></AnchorButton></td>
                                             <td><AnchorButton icon="download" minimal disabled={value.status !== 3} href={`${axios.defaults.baseURL}/submissions/${props.id}/receptors/${value.guid}/pdbqt`}></AnchorButton></td>
                                         </tr>

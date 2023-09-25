@@ -2,6 +2,8 @@ import { Container, Row, Col } from "react-grid-system"
 import submit from "./assets/submit.png"
 import submit2 from "./assets/submit2.png"
 import proteins from "./assets/proteins.png"
+import typeimg from "./assets/type.png"
+import alphafold from "./assets/alphafold.png"
 import status from "./assets/status.png"
 import ngl from "./assets/ngl.png"
 import table from "./assets/table.png"
@@ -28,12 +30,29 @@ export default function Tutorial() {
             <Card style={{marginTop: "20px"}}>
                 <Row >
                     <Col md={6}>
-                        <img alt="" src={proteins} style={{width: "100%", height: "auto"}}></img>
+                        <img alt="" src={typeimg} style={{width: "100%", height: "auto"}}></img>
                     </Col>
                     <Col md={6} style={{marginTop: "20px"}}>
-                        <H4>Step 2: Select Target Proteins</H4>
-                        <p>You can upload up to 100 target proteins, each smaller than 1000 amino acids.
+                        <H4>Step 2: Choose PDB or AlphaFold Mode</H4>
+                        <p>You can either upload up to 100 target proteins, each smaller than 1000 amino acids,
+                            or submit up to 100 UniProt ids for AlphaFold predictions, also limited to 1000 amino acids per sequence.
                         
+                        </p>
+                    </Col>
+                </Row>
+            </Card>
+            <Card style={{marginTop: "20px"}}>
+                <Row>
+                    <Col md={6}>
+                        <img alt="" src={proteins} style={{width: "auto", maxHeight: "400px", margin: "auto", display: "block", marginBottom: "20px", maxWidth: "100%"}}></img>
+                        <H4>Step 3a: Upload Target Proteins</H4>
+                        <p>Upload up to 100 target proteins in .pdb format, each smaller than 1000 amino acids.
+                        </p>
+                    </Col>
+                    <Col md={6}>
+                        <img alt="" src={alphafold} style={{width: "auto", maxHeight: "400px", margin: "auto", display: "block", marginBottom: "20px", maxWidth: "100%"}}></img>
+                        <H4>Step 3b: Provide UniProt Ids</H4>
+                        <p>Submit up to 100 UniProt ids for AlphaFold predictions. Only sequences with less than 1000 amino acids will be docked.
                         </p>
                     </Col>
                 </Row>
@@ -44,7 +63,7 @@ export default function Tutorial() {
                         <img alt="" src={submit2} style={{width: "100%", height: "auto"}}></img>
                     </Col>
                     <Col md={6} style={{marginTop: "20px"}}>
-                        <H4>Step 3: Submit</H4>
+                        <H4>Step 4: Submit</H4>
                         <p>Optionally you can provide an email address to get notified once your submission has finished.</p>
                     </Col>
                 </Row>
@@ -55,7 +74,7 @@ export default function Tutorial() {
                         <img alt="" src={status} style={{width: "100%", height: "auto"}}></img>
                     </Col>
                     <Col md={9} style={{marginTop: "20px"}}>
-                        <H4>Step 4: Check Status</H4>
+                        <H4>Step 5: Check Status</H4>
                         <p>After submitting, you will be forwarded to a page containing your submission status and, as soon as they are ready, your results. 
                         </p>
                         <p>Once your submission has started, you can also review its progress and view intermediate results.</p>
@@ -70,7 +89,7 @@ export default function Tutorial() {
                         <img alt="" src={ngl} style={{width: "100%", height: "auto"}}></img>
                     </Col>
                     <Col md={8} style={{marginTop: "20px"}}>
-                        <H4>Step 5: View Results</H4>
+                        <H4>Step 6: View Results</H4>
                         <p>You can view docking results in a table containing file names and calculated binding energies. You can also view the results in 3D by clicking on the <Icon icon="eye-open"></Icon> icon.
                         </p>
                         <p>To save the the visualization state as an image, you can click the "Screenshot" button on the molecular viewer. </p>
