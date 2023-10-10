@@ -19,8 +19,8 @@ export default function Home() {
                 <Col md={4}>
                     <h3>Citation</h3>
                     <p><b>ReverseDock: A Web Server for Blind Docking of a Single Ligand to Multiple Protein Targets Using AutoDock Vina</b></p>
-
                     <p>Fabian Krause, Karsten Voigt, Barbara Di Ventura, Mehmet Ali Öztürk</p>
+                    <a href=" https://doi.org/10.3389/fmolb.2023.1243970" rel="noopener noreferrer" target="_blank">https://doi.org/10.3389/fmolb.2023.1243970</a>
                 </Col>
             </Row>
         </Container>
