@@ -1,6 +1,6 @@
 import React, { RefCallback, useCallback, useEffect } from 'react'
 import axios from 'axios'
-import { Card, IToaster, H3, HTMLTable, AnchorButton, Icon, Spinner, InputGroup, FormGroup, Callout, Button } from '@blueprintjs/core'
+import { Card, Toaster, H3, HTMLTable, AnchorButton, Icon, Spinner, InputGroup, FormGroup, Callout, Button } from '@blueprintjs/core'
 import { Row, Col } from "react-grid-system"
 
 const ngl: any = require("ngl/dist/ngl")
@@ -18,7 +18,7 @@ interface IProps {
     id: string,
     resultsResponseData: any,
     setLoading: Function,
-    toaster: IToaster
+    toaster: Toaster
 }
 
 enum ESorted {

@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
-import { FileInput, AnchorButton, FormGroup, IToaster, Card, Callout, ProgressBar, Spinner, InputGroup, TextArea, Divider, Icon } from '@blueprintjs/core';
-import { Link, useHistory } from "react-router-dom";
+import { FileInput, AnchorButton, FormGroup, Toaster, Card, Callout, ProgressBar, Spinner, InputGroup, TextArea, Divider, Icon } from '@blueprintjs/core';
+import { Link, useNavigate } from "react-router-dom";
 import { Row, Col } from 'react-grid-system';
 
 interface ReceptorFeedback {
@@ -9,7 +9,7 @@ interface ReceptorFeedback {
     uniProtId: string
 }
 
-function UploadLigands(props : {setLoading: Function, toaster: IToaster, setStep: Function, setId: Function}) {
+function UploadLigands(props : {setLoading: Function, toaster: Toaster, setStep: Function, setId: Function}) {
     const [fileFormName, setFileFormName] = React.useState<string>("Select file")
     const [formData, setFormData] = React.useState<FormData>(new FormData());
     const [selectedFiles, setSelectedFiles] = React.useState<FileList | null>(null);
@@ -119,7 +119,7 @@ function SelectReceptorType(props : {setStep: Function}) {
     )
 }
 
-function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setStep: Function, id: string}) {
+function UploadReceptors(props : {setLoading: Function, toaster: Toaster, setStep: Function, id: string}) {
     const [fileFormName, setFileFormName] = React.useState<string>("Select file(s)")
     const [formData, setFormData] = React.useState<FormData>(new FormData());
     const [selectedFiles, setSelectedFiles] = React.useState<FileList | null>(null);
@@ -208,7 +208,7 @@ function UploadReceptors(props : {setLoading: Function, toaster: IToaster, setSt
     )
 }
 
-function UploadUniProtIds(props : {setLoading: Function, toaster: IToaster, setStep: Function, id: string}) {
+function UploadUniProtIds(props : {setLoading: Function, toaster: Toaster, setStep: Function, id: string}) {
     const [listUploaded, setListUploaded] = React.useState<boolean>(false);
     const [atLeastOneReceptorOkay, setAtLeastOneReceptorOkay] = React.useState<boolean>(false);
     const [receptorFeedback, setReceptorFeedback] = React.useState<ReceptorFeedback[]>([]);
@@ -350,8 +350,8 @@ function UploadUniProtIds(props : {setLoading: Function, toaster: IToaster, setS
     )
 }
 
-function ParamsSubmit(props: {toaster: IToaster, uuid: string}) {
-    const history = useHistory();
+function ParamsSubmit(props: {toaster: Toaster, uuid: string}) {
+    const navigate = useNavigate();
     const [email, setEmail] = React.useState<string>("");
     
     function submitForm() {
@@ -362,7 +362,7 @@ function ParamsSubmit(props: {toaster: IToaster, uuid: string}) {
         axios.post("/submissions/" + props.uuid + "/confirm", formData).then(
             (response) => {
                 props.toaster.show({message: "Submission successful!", intent: "success", icon:"tree"});
-                history.push(`/confirm?id=${props.uuid}&confirmationId=${response.data}`)
+                navigate(`/confirm?id=${props.uuid}&confirmationId=${response.data}`)
         }).catch(
             (err) => {
                 props.toaster.show({message: `Submission unsuccessful: ${err}` , intent: "danger"})
@@ -397,7 +397,7 @@ function ParamsSubmit(props: {toaster: IToaster, uuid: string}) {
     )
 }
 
-export default function SubmissionSubmit(props : {setLoading: Function, toaster: IToaster}) {
+export default function SubmissionSubmit(props : {setLoading: Function, toaster: Toaster}) {
     const [loading, setLoading] = React.useState<boolean>(false);
     const [step, setStep] = React.useState<number>(0);
     const [id, setId] = React.useState<string>("");

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import axios from 'axios';
-import { AnchorButton, Card, H3, H4, HTMLTable, IToaster, ProgressBar} from '@blueprintjs/core';
-import { useHistory, useLocation } from "react-router-dom";
+import { AnchorButton, Card, H3, H4, HTMLTable, Toaster, ProgressBar} from '@blueprintjs/core';
+import { useNavigate, useLocation } from "react-router-dom";
 import { Col, Container, Row } from "react-grid-system";
 import SubmissionResult from "./SubmissionResult";
 import SubmissionStatus from "./SubmissionStatus";
@@ -22,8 +22,8 @@ interface ISubmissionInfo {
     submissionTime: string
 }
 
-function SubmissionInfo(props: {setLoading: Function, toaster: IToaster}) {
-    const history = useHistory();
+function SubmissionInfo(props: {setLoading: Function, toaster: Toaster}) {
+    const navigate = useNavigate();
     const location = useLocation();
     const [id, setId] = React.useState<string>("")
     const [found, setFound] = React.useState<boolean>(false);
@@ -89,7 +89,7 @@ function SubmissionInfo(props: {setLoading: Function, toaster: IToaster}) {
     }, []); // empty deps => run once
 
     function findJob(ids: string = id) {
-        history.push("/info?id=" + ids);
+        navigate("/info?id=" + ids);
         props.setLoading(true);
         axios.get(`/submissions/${ids}`)
         .then(async (response) => {

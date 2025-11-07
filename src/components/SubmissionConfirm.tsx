@@ -1,10 +1,10 @@
-import { IToaster, Spinner } from "@blueprintjs/core";
+import { Toaster, Spinner } from "@blueprintjs/core";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Container } from "react-grid-system";
 import { useLocation } from "react-router-dom"
 
-export default function SubmissionConfirm(props: {toaster: IToaster}) {
+export default function SubmissionConfirm(props: {toaster: Toaster}) {
     const location = useLocation();
     const [error, setError] = useState<string|null>(null);
 
